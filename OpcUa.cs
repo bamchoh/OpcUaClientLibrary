@@ -8,7 +8,7 @@ using Opc.Ua.Client;
 
 namespace OpcUa
 {
-    public class OpcUa : IDisposable
+    public class OpcUaClient : IDisposable
     {
         private readonly string APP_NAME = "OPC UA Client for Python";
         private const string DEFAULT_CONFIG_SECTION_NAME = "Opc.Ua.Client.Python";
