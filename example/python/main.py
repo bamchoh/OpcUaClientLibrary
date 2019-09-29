@@ -5,7 +5,7 @@ import clr
 import sys
 
 clr.AddReference("System.Collections")
-clr.AddReference(".\lib\OpcUa")
+clr.AddReference(".\\..\\..\\bin\\Release\\OpcUa")
 
 from System.Collections.Generic import Dictionary
 from System import *
@@ -26,7 +26,7 @@ def main():
     var12 = "ns=2;s=Scalar_Static_String"
 
     opcua = OpcUa()
-    opcua.ConfigSectionName = "Opc.Ua.Client.Python"
+    #opcua.ConfigSectionName = "Opc.Ua.Client.Python"
     opcua.Open("opc.tcp://localhost:62541/Quickstarts/ReferenceServer")
     # security connection with user/pass
     # opcua.Open("opc.tcp://localhost:62541/Quickstarts/ReferenceServer", True, "user", "pass");
