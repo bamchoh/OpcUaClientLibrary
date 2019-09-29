@@ -4,7 +4,7 @@
   xmlns="http://opcfoundation.org/UA/SDK/Configuration.xsd"
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
-  <ApplicationName></ApplicationName>
+  <ApplicationName>OpcUaClientForPython</ApplicationName>
   <ApplicationUri>urn:localhost:OPCFoundation:OpcUaClientPython</ApplicationUri>
   <ProductUri>http://opcfoundation.org/UA/OpcUaClientPython</ProductUri>
   <ApplicationType>Client_1</ApplicationType>
