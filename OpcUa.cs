@@ -10,17 +10,18 @@ namespace OpcUa
 {
     public class OpcUaClient : IDisposable
     {
-        private readonly string APP_NAME = "OPC UA Client for Python";
-        private const string DEFAULT_CONFIG_SECTION_NAME = "Opc.Ua.Client.Python";
-
         private Session session;
 
-        public string ConfigSectionName { get; set; }
+        private string configFilename;
+
+        public OpcUaClient(string ConfigFilename)
+        {
+            this.configFilename = ConfigFilename;
+        }
 
         public void Dispose()
         {
-            if (session != null && session.Connected)
-                session.Close();
+            Close();
         }
 
         public bool Open(string endpointURI, bool useSecurity = false, string username = "", string password = "")
@@ -35,7 +36,7 @@ namespace OpcUa
                 config,
                 configureEndpoint,
                 false,
-                APP_NAME,
+                config.ApplicationName,
                 60000,
                 uid,
                 null).Result;
@@ -44,7 +45,8 @@ namespace OpcUa
 
         public void Close()
         {
-            this.session?.Close();
+            if (session != null && session.Connected)
+                session.Close();
         }
 
         public Dictionary<string, DataValue> Read(IEnumerable<string> keys)
@@ -136,18 +138,45 @@ namespace OpcUa
 
         private ApplicationConfiguration InitConfig()
         {
-            var application = new ApplicationInstance
-            {
-                ApplicationName = APP_NAME,
-                ApplicationType = ApplicationType.Client,
-                ConfigSectionName = ConfigSectionName ?? DEFAULT_CONFIG_SECTION_NAME,
-            };
+            var modConfigFilename = configFilename + ".mod.xml";
+            var fi = new System.IO.FileInfo(modConfigFilename);
 
-            var config = application.LoadApplicationConfiguration(false).Result;
+            ApplicationInstance application = null;
+            if(fi.Exists)
+            {
+                try
+                {
+                    application = GetApplicationInstance(modConfigFilename);
+                }
+                catch(AggregateException ex)
+                {
+                    if(!(ex.InnerException is ServiceResultException))
+                    {
+                        throw ex;
+                    }
+                }
+            }
+
+            if(application == null)
+            {
+                application = GetApplicationInstance(configFilename);
+                application.ApplicationConfiguration.SaveToFile(modConfigFilename);
+            }
+
+            var config = application.ApplicationConfiguration;
             config.CertificateValidator.CertificateValidation +=
                 new CertificateValidationEventHandler((sender, e) => e.Accept = true);
 
             return config;
+        }
+
+        private ApplicationInstance GetApplicationInstance(string loadFilename)
+        {
+            var application = new ApplicationInstance();
+            application.ApplicationType = ApplicationType.Client;
+            application.LoadApplicationConfiguration(loadFilename, false).Wait();
+            application.CheckApplicationInstanceCertificate(false, 0).Wait();
+            return application;
         }
 
         private UserIdentity GetUserIdentity(string username, string password)
